@@ -1,0 +1,21 @@
+---
+# Controller 配置用 role: kubectl インストール & kubeconfig 設定
+
+- block:
+    - name: Remove old ~/.kube/config if exists
+      ansible.builtin.file:
+        path: "{{ ansible_user_dir }}/.kube/config"
+        state: absent
+
+    - name: Ensure .kube directory exists
+      ansible.builtin.file:
+        path: "{{ ansible_user_dir }}/.kube"
+        state: directory
+        mode: '0755'
+
+    - name: Copy k3s kubeconfig for kubectl
+      ansible.builtin.copy:
+        src: files/k3s.yaml
+        dest: "{{ ansible_user_dir }}/.kube/config"
+        mode: '0644'
+  become: false

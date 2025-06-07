@@ -2,16 +2,41 @@
 - name: Raspberry Piセットアップ（pi4専用）
   hosts: pi4
   become: yes
+  tags: base
   roles:
     - network
     - ssh
     - update
 
+- name: K3sマスターセットアップ（単一マスター）
+  hosts: pi4-master01
+  become: yes
+  tags: k3s-master
+  roles:
+    - k3s-master
+
+- name: K3sワーカー/追加マスター join
+  hosts: pi4-worker
+  become: yes
+  tags: k3s-join
+  roles:
+    - k3s-join
+
 - name: 全ノードでsshdを明示的に再起動する（pi4専用）
   hosts: pi4
   become: yes
+  tags: base
   tasks:
     - name: sshdサービスを必ず再起動
       ansible.builtin.service:
         name: ssh
         state: restarted
+
+- name: Configure kubectl on Ansible controller
+  hosts: localhost
+  connection: local
+  gather_facts: true
+  tags:
+    - configure-controller
+  roles:
+    - controller-config

@@ -12,6 +12,8 @@ __pycache__/
 *.key
 id_rsa*
 files/id_rsa.pub
+files/id_rsa
+files/id_rsa.*.local
 # files/id_rsa.pub.dummy ← ダミー公開鍵は除外しない
 
 # OS/エディタ固有
@@ -23,3 +25,7 @@ Thumbs.db
 # その他
 .env
 group_vars/all.yml
+files/node-token
+files/k3s.yaml
+.kube/
+.vault_pass.txt

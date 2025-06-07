@@ -149,4 +149,22 @@ ansible-playbook -i inventory playbook.yml --ask-vault-pass
 
 ---
 
+## Raspberry Pi 4 K3sクラスタ構築時の注意点・手動作業
+
+### cgroup v2有効化は必ず手動で行ってください
+
+- Ansible実行前に、`cmdline.txt`（/boot/firmware/cmdline.txt または /boot/cmdline.txt）を必ず手動で編集してください。
+- 末尾に以下を追記（既存行の末尾にスペース区切りで追加）
+  ```
+  cgroup_memory=1 cgroup_enable=memory systemd.unified_cgroup_hierarchy=1
+  ```
+- 編集後、Raspberry Piを再起動してください。
+- その後、Ansibleプレイブックを実行してください。
+
+#### 備考
+- Ansibleはcmdline.txtの自動編集・権限チェックは行いません。
+- 手動編集・再起動が済んでいない場合、K3sインストール等が正常に動作しません。
+
+---
+
 ご質問・ご要望はIssueやPRでお知らせください。
