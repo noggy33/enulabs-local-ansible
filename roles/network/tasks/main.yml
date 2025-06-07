@@ -22,6 +22,7 @@
     insertafter: EOF
     backup: yes
   register: dhcpcd_result
+  when: ansible_distribution_release != 'bookworm'
 
 - name: ホスト名やDNS設定が変更された場合のみ再起動
   ansible.builtin.reboot:

@@ -11,6 +11,8 @@ __pycache__/
 *.pem
 *.key
 id_rsa*
+files/id_rsa.pub
+# files/id_rsa.pub.dummy ← ダミー公開鍵は除外しない
 
 # OS/エディタ固有
 .DS_Store
@@ -20,3 +22,4 @@ Thumbs.db
 
 # その他
 .env
+group_vars/all.yml

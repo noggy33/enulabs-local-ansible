@@ -1,29 +1,17 @@
 - name: 公開鍵を配置する
   ansible.builtin.authorized_key:
-    user: "{{ ssh_user }}"
+    user: "{{ ansible_ssh_user }}"
     state: present
     key: "{{ lookup('file', ssh_pubkey_file) }}"
 
-- name: 公開鍵認証を有効化する
-  ansible.builtin.lineinfile:
+- name: SSH設定を安全に管理（blockinfile + validate）
+  ansible.builtin.blockinfile:
     path: /etc/ssh/sshd_config
-    regexp: '^#?PasswordAuthentication'
-    line: 'PasswordAuthentication no'
-    state: present
+    marker: "# {mark} ANSIBLE MANAGED BLOCK - SSH設定"
+    block: |
+      PasswordAuthentication {{ ssh_password_auth | default('yes') | bool | ternary('yes', 'no') }}
+      PubkeyAuthentication yes
     backup: yes
+    create: no
+    validate: 'sshd -t -f %s'
   notify: SSHサービスを再起動
-
-- name: 公開鍵認証方式を有効化
-  ansible.builtin.lineinfile:
-    path: /etc/ssh/sshd_config
-    regexp: '^#?PubkeyAuthentication'
-    line: 'PubkeyAuthentication yes'
-    state: present
-    backup: yes
-  notify: SSHサービスを再起動
-
-handlers:
-  - name: SSHサービスを再起動
-    ansible.builtin.service:
-      name: ssh
-      state: restarted

@@ -5,3 +5,13 @@
   roles:
     - network
     - ssh
+    - update
+
+- name: 全ノードでsshdを明示的に再起動する
+  hosts: all
+  become: yes
+  tasks:
+    - name: sshdサービスを必ず再起動
+      ansible.builtin.service:
+        name: ssh
+        state: restarted

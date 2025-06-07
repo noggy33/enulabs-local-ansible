@@ -1,3 +1,4 @@
 hostname: pi4-master03.enulabs.local
 dns_nameservers:
   - 192.168.4.254
+ssh_password_auth: 'no'
