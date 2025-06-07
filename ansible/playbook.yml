@@ -40,3 +40,31 @@
     - configure-controller
   roles:
     # - controller-config
+
+- name: Node labeling/tainting
+  hosts: pi4-worker
+  gather_facts: false
+  tasks:
+    - name: Set node labels
+      ansible.builtin.shell: |
+        kubectl label node {{ k8s_node_name }} role={{ node_role }} power={{ power_policy }} --kubeconfig {{ playbook_dir }}/files/k3s.yaml --overwrite
+      when: node_role is defined and power_policy is defined and k8s_node_name is defined
+      delegate_to: localhost
+      changed_when: true
+      register: label_result
+
+    - name: Show label command result
+      debug:
+        var: label_result
+
+    - name: Set node taints
+      ansible.builtin.shell: |
+        kubectl taint node {{ k8s_node_name }} {{ node_taint }} --kubeconfig {{ playbook_dir }}/files/k3s.yaml --overwrite
+      when: node_taint is defined and k8s_node_name is defined
+      delegate_to: localhost
+      changed_when: true
+      register: taint_result
+
+    - name: Show taint command result
+      debug:
+        var: taint_result
