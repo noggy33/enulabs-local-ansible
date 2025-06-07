@@ -1,0 +1,43 @@
+---
+# master1: クラスタ初期化, master2/3: join
+- name: Check if k3s service is running
+  shell: systemctl is-active k3s || true
+  register: k3s_service_status
+  changed_when: false
+
+- name: Install initial master (cluster-init)
+  shell: |
+    curl -sfL https://get.k3s.io | \
+      INSTALL_K3S_VERSION="{{ k3s_version }}" \
+      K3S_TOKEN="{{ cluster_token }}" \
+      sh -s - server \
+      --cluster-init \
+      --node-ip {{ ansible_host }} \
+      --advertise-address {{ ansible_host }} \
+      --tls-san {{ vip }}
+  when:
+    - inventory_hostname == 'pi4-master01'
+    - k3s_service_status.stdout != 'active'
+
+- name: Get kubeconfig & node-token from master1
+  command: cat /var/lib/rancher/k3s/server/node-token
+  delegate_to: pi4-master01
+  run_once: true
+  register: master1_token
+  changed_when: false
+
+- name: Join other masters
+  shell: |
+    curl -sfL https://get.k3s.io | \
+      INSTALL_K3S_VERSION="{{ k3s_version }}" \
+      K3S_TOKEN="{{ cluster_token }}" \
+      sh -s - server \
+      --server https://{{ vip }}:6443 \
+      --node-ip {{ ansible_host }} \
+      --advertise-address {{ ansible_host }} \
+      --tls-san {{ vip }}
+  when:
+    - inventory_hostname != 'pi4-master01'
+    - k3s_service_status.stdout != 'active'
+
+# ワーカーjoin処理はk3s_agentロールに移動したため削除

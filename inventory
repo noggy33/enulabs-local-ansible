@@ -1,7 +1,7 @@
 [pi4-master]
 pi4-master01 ansible_host=192.168.4.201 ansible_user=pi
-# pi4-master02 ansible_host=192.168.4.202 ansible_user=pi
-# pi4-master03 ansible_host=192.168.4.203 ansible_user=pi
+pi4-master02 ansible_host=192.168.4.202 ansible_user=pi
+pi4-master03 ansible_host=192.168.4.203 ansible_user=pi
 
 [pi4-worker]
 pi4-worker01 ansible_host=192.168.4.204 ansible_user=pi
@@ -9,6 +9,11 @@ pi4-worker01 ansible_host=192.168.4.204 ansible_user=pi
 [pi4:children]
 pi4-master
 pi4-worker
+
+[all:vars]
+k3s_version=v1.32.5+k3s1
+cluster_token=RPICLUSTER-xxxxxxxxxx
+vip=192.168.4.201
 
 [all:children]
 pi4

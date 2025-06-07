@@ -167,4 +167,59 @@ ansible-playbook -i inventory playbook.yml --ask-vault-pass
 
 ---
 
+## K3sクラスタ自動構築の流れ
+
+本リポジトリのplaybookは、Raspberry Pi 4（Debian 12 bookworm）を使ったk3sクラスタ（3台マスター＋ワーカー）を冪等的に自動構築できます。
+
+### ロール構成と役割
+- `k3s_common` : cgroup v2有効化など、全ノード共通の前提セットアップ
+- `k3s_server` : マスター（HA構成）用。初期化・追加マスターjoin・kubeconfig取得など
+- `k3s_agent`  : ワーカー用。クラスタjoinとk3s-agentセットアップ
+
+### 構築手順（自動化）
+1. inventory/host_vars/group_varsを編集し、対象ノードを定義
+2. playbookを実行（冪等性あり、何度でも再実行OK）
+3. マスター3台が自動でクラスタを構成し、ワーカーは自動join
+4. `kubectl get nodes` で全ノードの正常動作を確認
+
+### 冪等性・再実行性
+- すべての主要タスクは冪等性を考慮（systemctl is-active等で判定）
+- 途中失敗しても再実行で自動復旧可能
+
+### トラブルシュート
+- ワーカーがjoinしない場合は、`k3s-agent`サービスの状態やログ（`journalctl -u k3s-agent`）を確認
+- マスターjoin失敗時は、`/var/lib/rancher/k3s/server`配下の証明書やtokenを確認
+- cgroup v2未有効の場合は、手動で`cmdline.txt`を編集し再起動
+
+### 参考リンク
+- [k3s公式ドキュメント](https://rancher.com/docs/k3s/latest/en/)
+- [Ansible公式ドキュメント](https://docs.ansible.com/)
+
+---
+
+## k3sクリーンアップ（アンインストール）
+
+### k3s_cleanupロールについて
+
+クラスタ再構築やノードの初期化時に便利な「k3s_cleanup」ロールを用意しています。
+
+- k3s/k3s-agentサービスの停止
+- アンインストールスクリプトの実行
+- 関連ディレクトリ・バイナリの削除
+
+### 使い方例
+
+任意のノードでk3s関連を完全削除したい場合、以下のようなplaybookを作成して適用してください。
+
+```yaml
+- hosts: pi4-worker01  # 対象ノードを指定
+  become: yes
+  roles:
+    - k3s_cleanup
+```
+
+> **注意:** 本ロールは破壊的です。必要なデータや設定は事前にバックアップしてください。
+
+---
+
 ご質問・ご要望はIssueやPRでお知らせください。
