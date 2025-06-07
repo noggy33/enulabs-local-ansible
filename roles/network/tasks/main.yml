@@ -12,17 +12,30 @@
     backup: yes
   register: hosts_result
 
-- name: DNSサーバー・サーチドメインを /etc/dhcpcd.conf に追記
+# - name: DNSサーバー・サーチドメインを /etc/dhcpcd.conf に追記
+#   ansible.builtin.blockinfile:
+#     path: /etc/dhcpcd.conf
+#     block: |
+#       static domain_name_servers=192.168.4.254 1.1.1.1
+#       static domain_search={{ search_domain }}
+#     marker: "; ANSIBLE MANAGED BLOCK - DNS設定"
+#     insertafter: EOF
+#     backup: yes
+#   register: dhcpcd_result
+#   when: ansible_distribution_release != 'bookworm'
+
+- name: Set DNS via /etc/resolv.conf (bookworm or dhcpcd.conf not present)
   ansible.builtin.blockinfile:
-    path: /etc/dhcpcd.conf
+    path: /etc/resolv.conf
     block: |
-      static domain_name_servers={% for ns in dns_nameservers %}{{ ns }}{% if not loop.last %} {% endif %}{% endfor %}
-      static domain_search={{ search_domain }}
+      nameserver 192.168.4.254
+      nameserver 1.1.1.1
+      search enulabs.local
     marker: "; ANSIBLE MANAGED BLOCK - DNS設定"
-    insertafter: EOF
+    insertafter: BOF
     backup: yes
-  register: dhcpcd_result
-  when: ansible_distribution_release != 'bookworm'
+  register: resolvconf_result
+  when: ansible_distribution_release == 'bookworm' or not ansible_facts['files'].get('/etc/dhcpcd.conf')
 
 - name: ホスト名やDNS設定が変更された場合のみ再起動
   ansible.builtin.reboot:
