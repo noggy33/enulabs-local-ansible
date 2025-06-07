@@ -1,14 +1,14 @@
 ---
-- name: Raspberry Piセットアップ
-  hosts: all
+- name: Raspberry Piセットアップ（pi4専用）
+  hosts: pi4
   become: yes
   roles:
     - network
     - ssh
     - update
 
-- name: 全ノードでsshdを明示的に再起動する
-  hosts: all
+- name: 全ノードでsshdを明示的に再起動する（pi4専用）
+  hosts: pi4
   become: yes
   tasks:
     - name: sshdサービスを必ず再起動
