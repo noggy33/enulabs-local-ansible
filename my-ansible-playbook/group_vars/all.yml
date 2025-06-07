@@ -1,0 +1,4 @@
+# 共通の変数はここで管理します
+search_domain: enulabs.local
+ssh_pubkey_file: files/id_rsa.pub
+ssh_user: pi

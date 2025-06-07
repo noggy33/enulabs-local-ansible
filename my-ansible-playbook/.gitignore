@@ -1,0 +1,22 @@
+# Ansible関連
+*.retry
+*.log
+*.bak
+*.swp
+*.swo
+*.pyc
+__pycache__/
+
+# SSH鍵や秘密情報
+*.pem
+*.key
+id_rsa*
+
+# OS/エディタ固有
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# その他
+.env
