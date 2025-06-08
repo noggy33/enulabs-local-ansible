@@ -25,7 +25,7 @@ Thumbs.db
 # その他
 .env
 group_vars/all.yml
-files/node-token
-files/k3s.yaml
+ansible/files/node-token
+ansible/files/k3s.yaml
 .kube/
 .vault_pass.txt
