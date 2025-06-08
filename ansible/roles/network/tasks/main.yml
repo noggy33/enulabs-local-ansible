@@ -48,7 +48,7 @@
   when:
     - hostname_result is changed
     - hosts_result is changed
-    - dhcpcd_result is changed
+    - resolvconf_result is changed
 
 - name: piユーザーをsudoersに追加しパスワード不要にする
   ansible.builtin.lineinfile:
