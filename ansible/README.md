@@ -44,6 +44,7 @@ sudo apt install -y ansible
 - `group_vars/all.yml` で共通変数（サーチドメイン・SSHユーザー・公開鍵パスなど）を管理
 - `files/id_rsa.pub` は**ローカル専用**（本物の公開鍵）。**リポジトリには含めず、`.gitignore`で除外**します。
 - `files/id_rsa.pub.dummy` は**ダミー公開鍵**で、リポジトリに含めます。
+- `files/k3s.yaml` と `files/node-token` はK3sクラスタの設定ファイルです。`k3s.yaml.sample` と `node-token.sample` をコピーして内容を自分用に置き換え、**リポジトリには含めない**ようにしてください。
 
 > **運用例**: 本物の公開鍵は `files/id_rsa.pub` としてローカルに配置し、リポジトリには `files/id_rsa.pub.dummy` のみを含めてください。
 
