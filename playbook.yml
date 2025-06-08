@@ -47,3 +47,12 @@
   roles:
     - k3s_node_labeling
 
+- name: Ingress/MetalLB/traefik 自動化
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  tags:
+    - ingress
+  roles:
+    - k3s_ingress
+

@@ -224,3 +224,21 @@ ansible-playbook -i inventory playbook.yml --ask-vault-pass
 ---
 
 ご質問・ご要望はIssueやPRでお知らせください。
+
+## ディレクトリ統合・実行方法について
+
+2025年6月より、`ansible/` ディレクトリ階層を廃止し、すべてのAnsible関連ファイル・ディレクトリ（roles, files, host_vars, group_vars, playbook.yml など）はワークスペース直下に統合されています。
+
+- 旧: `ansible/playbook.yml`, `ansible/roles/` ...
+- 新: `playbook.yml`, `roles/` ...（ワークスペース直下）
+
+### 実行例
+```bash
+ansible-playbook -i inventory playbook.yml --vault-password-file ~/.vault_pass.txt
+```
+
+> ※ `-i inventory` を必ず指定してください。
+
+### 注意
+- 旧 `ansible/` ディレクトリは不要です。ワークスペース直下のみを管理・運用してください。
+- 既存のパス指定や参照先も、すべてワークスペース直下に合わせて修正済みです。
