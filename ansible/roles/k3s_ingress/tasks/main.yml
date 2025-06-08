@@ -1,0 +1,111 @@
+---
+# MetalLB namespace作成
+- name: Create metallb-system namespace
+  kubernetes.core.k8s:
+    api_version: v1
+    kind: Namespace
+    name: metallb-system
+    state: present
+    kubeconfig: files/k3s.yaml
+
+- name: Remove traefik HelmChart (K3s default)
+  kubernetes.core.k8s:
+    api_version: helm.cattle.io/v1
+    kind: HelmChart
+    name: traefik
+    namespace: kube-system
+    state: absent
+    kubeconfig: files/k3s.yaml
+
+- name: Remove traefik Service and Deployment
+  kubernetes.core.k8s:
+    api_version: v1
+    kind: Service
+    name: traefik
+    namespace: kube-system
+    state: absent
+    kubeconfig: files/k3s.yaml
+
+- name: Remove traefik Deployment
+  kubernetes.core.k8s:
+    api_version: apps/v1
+    kind: Deployment
+    name: traefik
+    namespace: kube-system
+    state: absent
+    kubeconfig: files/k3s.yaml
+
+# MetalLB Helmリポジトリ追加
+- name: Add metallb Helm repo
+  community.kubernetes.helm_repository:
+    name: metallb
+    repo_url: https://metallb.github.io/metallb
+    kubeconfig: files/k3s.yaml
+
+# MetalLBデプロイ
+- name: Install/Upgrade MetalLB via Helm
+  community.kubernetes.helm:
+    name: metallb
+    chart_ref: metallb/metallb
+    release_namespace: metallb-system
+    create_namespace: false
+    state: present
+    update_repo_cache: true
+    kubeconfig: files/k3s.yaml
+
+- name: Wait for MetalLB pods to be ready
+  kubernetes.core.k8s_info:
+    kind: Pod
+    namespace: metallb-system
+    kubeconfig: files/k3s.yaml
+  register: metallb_pods
+  until: metallb_pods.resources | selectattr('status.phase', 'equalto', 'Running') | list | length == metallb_pods.resources | length
+  retries: 20
+  delay: 6
+
+# MetalLB IPAddressPool/L2Advertisement
+- name: Apply MetalLB IPAddressPool and L2Advertisement
+  kubernetes.core.k8s:
+    state: present
+    definition: |
+      apiVersion: metallb.io/v1beta1
+      kind: IPAddressPool
+      metadata: {name: lab-pool, namespace: metallb-system}
+      spec:
+        addresses:
+        - 192.168.4.230-192.168.4.250
+      ---
+      apiVersion: metallb.io/v1beta1
+      kind: L2Advertisement
+      metadata: {name: lab-adv, namespace: metallb-system}
+      spec:
+        ipAddressPools: ["lab-pool"]
+    kubeconfig: files/k3s.yaml
+
+# ingress-nginx Helmリポジトリ追加
+- name: Add ingress-nginx Helm repo
+  community.kubernetes.helm_repository:
+    name: ingress-nginx
+    repo_url: https://kubernetes.github.io/ingress-nginx
+    kubeconfig: files/k3s.yaml
+
+# ingress-nginxデプロイ
+- name: Install ingress-nginx via Helm
+  community.kubernetes.helm:
+    name: ingress
+    chart_ref: ingress-nginx/ingress-nginx
+    release_namespace: ingress-nginx
+    create_namespace: true
+    state: present
+    update_repo_cache: true
+    values:
+      controller:
+        nodeSelector:
+          role: ingress
+        tolerations:
+          - key: ingress
+            operator: Exists
+        service:
+          type: LoadBalancer
+          loadBalancerIP: 192.168.4.230
+    kubeconfig: files/k3s.yaml
