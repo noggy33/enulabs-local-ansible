@@ -12,6 +12,6 @@
     chart_ref: nats/nats-operator
     release_namespace: jetstream
     create_namespace: true
-    values: "{{ lookup('file', 'files/jetstream-values.yaml') | from_yaml }}"
+    values: "{{ lookup('file', 'roles/k3s_core_helm/files/jetstream-values.yaml') | from_yaml }}"
     wait: true
   tags: jetstream

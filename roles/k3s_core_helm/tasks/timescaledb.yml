@@ -12,6 +12,6 @@
     chart_ref: timescale/timescaledb-single
     release_namespace: timescaledb
     create_namespace: true
-    values: "{{ lookup('file', 'files/timescaledb-values.yaml') | from_yaml }}"
+    values: "{{ lookup('file', 'roles/k3s_core_helm/files/timescaledb-values.yaml') | from_yaml }}"
     wait: true
   tags: timescaledb

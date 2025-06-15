@@ -8,7 +8,7 @@
   include_tasks: nfs_csi.yml
   tags: k3s_core
 
-- name: kube-prometheus-stack を Helm でインストール
+- name: kube-prometheus-stack を Helm で インストール
   include_tasks: kube_prometheus_stack.yml
   tags: k3s_core
 
@@ -23,4 +23,6 @@
 - name: JetStream OperatorをHelmでインストール
   include_tasks: jetstream.yml
   tags: k3s_core
+
+# INA219関連のデプロイはk3s_core_deployロールへ移動
 
