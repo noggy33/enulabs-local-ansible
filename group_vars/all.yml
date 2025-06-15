@@ -1,0 +1,6 @@
+# 共通の変数はここで管理します
+search_domain: enulabs.local
+ssh_pubkey_file: files/id_rsa.pub
+ansible_ssh_pass: "{{ lookup('env', 'ANSIBLE_SSH_PASS') }}"
+ansible_become_method: sudo
+ansible_become_password: "{{ lookup('env', 'ANSIBLE_BECOME_PASS') }}"

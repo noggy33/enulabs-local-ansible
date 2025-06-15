@@ -1,5 +1,0 @@
-# pi4-worker グループ用ノードラベル・テイント変数例
-k8s_node_name: "pi4-worker01.enulabs.local"
-node_role: "ingress"
-power_policy: "always-on"
-node_taint: "ingress=true:NoSchedule"

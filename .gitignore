@@ -1,4 +1,4 @@
-# Ansible関連
+# Ansible一時ファイル・キャッシュ
 *.retry
 *.log
 *.bak
@@ -7,25 +7,22 @@
 *.pyc
 __pycache__/
 
-# SSH鍵や秘密情報
+# 秘密鍵・認証情報（ダミー公開鍵は除外しない）
 *.pem
 *.key
 id_rsa*
-files/id_rsa.pub
-files/id_rsa
-files/id_rsa.*.local
+files/id_rsa*
+!files/id_rsa.pub.dummy
 # files/id_rsa.pub.dummy ← ダミー公開鍵は除外しない
 
-# OS/エディタ固有
+# OS/エディタ固有ファイル
 .DS_Store
 Thumbs.db
 .vscode/
 .idea/
 
-# その他
+# 機密性の高い変数やトークン
 .env
-group_vars/all.yml
-files/node-token
 files/k3s.yaml
 .kube/
-.vault_pass.txt
+

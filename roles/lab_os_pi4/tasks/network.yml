@@ -1,0 +1,34 @@
+# --- ネットワーク設定 ---
+- name: ホスト名を変更する
+  ansible.builtin.hostname:
+    name: "{{ hostname }}"
+  register: hostname_result
+
+- name: /etc/hosts をホスト名に合わせて修正
+  ansible.builtin.lineinfile:
+    path: /etc/hosts
+    regexp: '^127.0.1.1'
+    line: "127.0.1.1   {{ hostname }}"
+    state: present
+    backup: yes
+  register: hosts_result
+
+- name: Set DNS via /etc/resolv.conf（pi4用）
+  ansible.builtin.blockinfile:
+    path: /etc/resolv.conf
+    block: |
+      nameserver 192.168.4.254
+      nameserver 1.1.1.1
+      search enulabs.local
+    marker: "; ANSIBLE MANAGED BLOCK - DNS設定"
+    insertafter: BOF
+    backup: yes
+  register: resolvconf_result
+
+- name: piユーザーをsudoersに追加しパスワード不要にする
+  ansible.builtin.lineinfile:
+    path: /etc/sudoers.d/010_pi_nopasswd
+    create: yes
+    mode: '0440'
+    line: 'pi ALL=(ALL) NOPASSWD:ALL'
+    state: present

@@ -1,0 +1,52 @@
+# --- ネットワーク設定 ---
+- name: Find existing netplan YAML
+  ansible.builtin.find:
+    paths: /etc/netplan
+    patterns: "*.yaml"
+  register: found_netplan
+  tags: lab_os_ubuntu
+
+- name: Set netplan_file fact
+  ansible.builtin.set_fact:
+    netplan_file: "{{ found_netplan.files[0].path }}"
+  when: found_netplan.files | length > 0
+  tags: lab_os_ubuntu
+
+- name: ホスト名を変更する
+  ansible.builtin.hostname:
+    name: "{{ hostname }}"
+  register: hostname_result
+  tags: lab_os_ubuntu
+
+- name: /etc/hosts をホスト名に合わせて修正
+  ansible.builtin.lineinfile:
+    path: /etc/hosts
+    regexp: '^127.0.1.1'
+    line: "127.0.1.1   {{ hostname }}"
+    state: present
+    backup: yes
+  register: hosts_result
+  tags: lab_os_ubuntu
+
+- name: Set DNS via netplan (ubuntu用)
+  ansible.builtin.blockinfile:
+    path: "{{ netplan_file }}"
+    block: |
+      # ANSIBLE MANAGED BLOCK - DNS設定
+      network:
+        version: 2
+        ethernets:
+          eth0:
+            nameservers:
+              addresses: {{ dns_servers | default(['192.168.4.254','1.1.1.1']) }}
+              search: [enulabs.local]
+    marker: "# ANSIBLE MANAGED BLOCK - DNS設定"
+    insertafter: EOF
+    backup: yes
+  register: netplan_result
+  tags: lab_os_ubuntu
+
+- name: Apply netplan changes (ubuntu用)
+  ansible.builtin.command: netplan apply
+  when: netplan_result is changed
+  tags: lab_os_ubuntu

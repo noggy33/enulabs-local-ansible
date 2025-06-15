@@ -1,0 +1,20 @@
+# --- SSH設定 ---
+- name: 公開鍵を配置する
+  ansible.builtin.authorized_key:
+    user: "ubuntu"
+    state: present
+    key: "{{ lookup('file', ssh_pubkey_file) }}"
+  tags: lab_os_ubuntu
+
+- name: SSH設定を安全に管理（blockinfile + validate）
+  ansible.builtin.blockinfile:
+    path: /etc/ssh/sshd_config
+    marker: "# {mark} ANSIBLE MANAGED BLOCK - SSH設定"
+    block: |
+      PasswordAuthentication {{ ssh_password_auth | default('yes') | bool | ternary('yes', 'no') }}
+      PubkeyAuthentication yes
+    backup: yes
+    create: no
+    validate: 'sshd -t -f %s'
+  notify: sshd_restart
+  tags: lab_os_ubuntu

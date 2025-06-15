@@ -1,0 +1,16 @@
+- name: cgroup v2有効化（Raspberry Pi OS専用）
+  ansible.builtin.lineinfile:
+    path: /boot/firmware/cmdline.txt
+    regexp: '^(.*)rootwait'
+    line: '\1 cgroup_enable=cpuset cgroup_memory=1 cgroup_enable=memory'
+    backrefs: yes
+  register: cgroup_line
+
+- name: Remount /boot/firmware RW (if readonly)
+  ansible.builtin.shell: mount -o remount,rw /boot/firmware
+  when: cgroup_line is changed
+
+- name: Reboot if kernel args changed
+  ansible.builtin.reboot:
+    reboot_timeout: 180
+  when: cgroup_line is changed

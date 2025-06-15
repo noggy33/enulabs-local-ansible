@@ -1,0 +1,33 @@
+# roles/k3s_core_helm/files/loki-stack-values.yaml
+loki:
+  image:
+    tag: "2.9.7"
+
+  nodeSelector:
+    arch: amd64-core
+  tolerations:
+    - key: node-type
+      operator: Equal
+      value: core
+      effect: NoExecute
+  persistence:
+    enabled: true
+    storageClassName: nfs-persist
+    size: 10Gi
+
+promtail:
+  nodeSelector:
+    arch: amd64-core
+  tolerations:
+    - key: node-type
+      operator: Equal
+      value: core
+      effect: NoExecute
+
+# ─── ここを追加 ──┐
+grafana:
+  sidecar:
+    datasources:
+      enabled: true          # ← Loki の ConfigMap は作る
+      defaultDatasourceEnabled: false   # ← isDefault: false にする
+# ─────────────────┘

@@ -6,6 +6,18 @@ pi4-master03 ansible_host=192.168.4.203 ansible_user=pi
 [pi4-worker]
 pi4-worker01 ansible_host=192.168.4.204 ansible_user=pi
 
+[ubuntu-worker]
+ubuntu-worker01 ansible_host=192.168.4.210 ansible_user=ubuntu
+
+[core:children]
+ubuntu-worker
+
+[ingress:children]
+pi4-worker
+
+[ubuntu:children]
+ubuntu-worker
+
 [pi4:children]
 pi4-master
 pi4-worker
@@ -17,3 +29,4 @@ vip=192.168.4.201
 
 [all:children]
 pi4
+ubuntu

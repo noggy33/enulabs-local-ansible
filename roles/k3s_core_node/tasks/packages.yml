@@ -1,0 +1,7 @@
+# ZFS/NFS パッケージインストール
+- name: ZFS/NFS パッケージをインストール
+  ansible.builtin.apt:
+    name: [zfsutils-linux, nfs-kernel-server]
+    state: present
+    update_cache: yes
+  tags: [k3s_core_node]

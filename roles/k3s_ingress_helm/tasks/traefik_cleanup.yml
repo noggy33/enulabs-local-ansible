@@ -1,0 +1,107 @@
+---
+# Traefik関連削除
+- name: Remove traefik HelmChart (K3s default)
+  kubernetes.core.k8s:
+    api_version: helm.cattle.io/v1
+    kind: HelmChart
+    name: traefik
+    namespace: kube-system
+    state: absent
+    kubeconfig: files/k3s.yaml
+
+- name: Remove traefik Service
+  kubernetes.core.k8s:
+    api_version: v1
+    kind: Service
+    name: traefik
+    namespace: kube-system
+    state: absent
+    kubeconfig: files/k3s.yaml
+
+- name: Remove traefik Deployment
+  kubernetes.core.k8s:
+    api_version: apps/v1
+    kind: Deployment
+    name: traefik
+    namespace: kube-system
+    state: absent
+    kubeconfig: files/k3s.yaml
+
+- name: Remove Traefik RBAC (SA / CR / CRB)
+  kubernetes.core.k8s:
+    state: absent
+    kubeconfig: files/k3s.yaml
+    definition: |
+      apiVersion: v1
+      kind: ServiceAccount
+      metadata:
+        name: traefik-ingress-controller
+        namespace: kube-system
+      ---
+      apiVersion: rbac.authorization.k8s.io/v1
+      kind: ClusterRole
+      metadata:
+        name: traefik-ingress-controller
+      ---
+      apiVersion: rbac.authorization.k8s.io/v1
+      kind: ClusterRoleBinding
+      metadata:
+        name: traefik-ingress-controller
+
+- name: Remove Traefik CRDs
+  kubernetes.core.k8s:
+    api_version: apiextensions.k8s.io/v1
+    kind: CustomResourceDefinition
+    name: "{{ item }}"
+    state: absent
+    kubeconfig: files/k3s.yaml
+  loop:
+    - ingressroutes.traefik.containo.us
+    - ingressroutetcps.traefik.containo.us
+    - ingressrouteudps.traefik.containo.us
+    - middlewares.traefik.containo.us
+    - tlsoptions.traefik.containo.us
+    - tlsstores.traefik.containo.us
+    - traefikservices.traefik.containo.us
+
+- name: Delete static Traefik manifest on k3s master nodes
+  ansible.builtin.file:
+    path: /var/lib/rancher/k3s/server/manifests/traefik.yaml
+    state: absent
+  become: yes
+  delegate_to: "{{ item }}"
+  vars:
+    ansible_python_interpreter: /usr/bin/python3
+  loop: "{{ groups['pi4-master'] | default([]) }}"
+  when: groups['pi4-master'] is defined
+
+# ---------- static Traefik manifest cleanup ----------
+- name: Look for static Traefik manifests on master nodes
+  ansible.builtin.find:
+    paths: /var/lib/rancher/k3s/server/manifests
+    patterns: 'traefik*.yaml'
+  register: traefik_files
+  delegate_to: "{{ item }}"
+  loop: "{{ groups['pi4-master'] | default([]) }}"
+  become: true
+  vars:
+    # Pi 4 (Raspberry Pi OS / Ubuntu 22.04) のデフォルト python
+    ansible_python_interpreter: /usr/bin/python3        # ★ここを追加
+
+- name: Delete the manifests that were found
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    state: absent
+  loop: "{{ traefik_files.results | map(attribute='files') | flatten }}"
+  become: true
+  when: traefik_files is defined
+
+
+- name: Remove traefik Service (LoadBalancer)
+  kubernetes.core.k8s:
+    api_version: v1
+    kind: Service
+    name: traefik
+    namespace: kube-system
+    state: absent
+    kubeconfig: files/k3s.yaml

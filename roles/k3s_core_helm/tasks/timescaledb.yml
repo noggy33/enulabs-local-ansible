@@ -1,0 +1,17 @@
+---
+# TimescaleDB Helmリリースのデプロイ
+- name: timescaleリポジトリ追加
+  community.kubernetes.helm_repository:
+    name: timescale
+    repo_url: https://charts.timescale.com
+  tags: timescaledb
+
+- name: timescaledb-single Helmリリースのインストール
+  community.kubernetes.helm:
+    name: timescaledb-single
+    chart_ref: timescale/timescaledb-single
+    release_namespace: timescaledb
+    create_namespace: true
+    values: "{{ lookup('file', 'files/timescaledb-values.yaml') | from_yaml }}"
+    wait: true
+  tags: timescaledb

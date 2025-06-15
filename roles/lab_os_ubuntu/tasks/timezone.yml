@@ -1,0 +1,5 @@
+---
+- name: TimezoneをAsia/Tokyoに設定
+  community.general.timezone:
+    name: Asia/Tokyo
+  tags: lab_os_ubuntu, timezone

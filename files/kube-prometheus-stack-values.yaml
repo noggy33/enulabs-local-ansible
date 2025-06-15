@@ -1,0 +1,60 @@
+# roles/k3s_core_helm/files/kube-prometheus-stack-values.yaml
+grafana:
+  service:
+    type: LoadBalancer
+    loadBalancerIP: 192.168.4.232
+    port: 3000           # targetPort も 3000 へ統一
+    targetPort: 3000
+    externalTrafficPolicy: Local
+  replicaCount: 1
+  nodeSelector:
+    arch: amd64-core
+  tolerations:
+    - key: node-type
+      operator: Equal
+      value: core
+      effect: NoExecute
+  persistence:
+    enabled: true
+    storageClassName: nfs-persist
+    size: 5Gi
+
+prometheus:
+  prometheusSpec:
+    replicas: 1
+    storageSpec:
+      volumeClaimTemplate:
+        spec:
+          storageClassName: nfs-persist
+          accessModes: ["ReadWriteOnce"]
+          resources:
+            requests:
+              storage: 8Gi
+  nodeSelector:
+    arch: amd64-core
+  tolerations:
+    - key: node-type
+      operator: Equal
+      value: core
+      effect: NoExecute
+
+alertmanager:
+  alertmanagerSpec:
+    replicas: 1
+  nodeSelector:
+    arch: amd64-core
+  tolerations:
+    - key: node-type
+      operator: Equal
+      value: core
+      effect: NoExecute
+
+# ↓ もし global レベルで共通のノードセレクタやトレランスを付けるなら
+nodeSelector:
+  arch: amd64-core
+
+tolerations:
+  - key: node-type
+    operator: Equal
+    value: core
+    effect: NoExecute

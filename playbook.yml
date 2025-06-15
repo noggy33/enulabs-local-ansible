@@ -1,51 +1,49 @@
 ---
-- name: Base setup
+- name: Base setup (pi4)
   hosts: pi4
   become: yes
   tags: base
   roles:
-    - network
-    - ssh
-    - update
+    - lab_os_pi4
+
+- name: Base setup (ubuntu)
+  hosts: ubuntu
+  become: yes
+  tags: base
+  roles:
+    - lab_os_ubuntu
 
 - name: K3s master (HA)
   hosts: pi4-master
   become: yes
   roles:
-    - k3s_common
-    - k3s_server
+    - k3s_node_server
 
-- name: K3s worker
+- name: K3s worker (pi4)
   hosts: pi4-worker
   become: yes
   roles:
-    - k3s_common
-    - k3s_agent
+    - k3s_node_agent
 
-- name: Restart sshd
-  hosts: pi4
+- name: K3s worker (ubuntu)
+  hosts: ubuntu-worker
   become: yes
-  tags: base
-  tasks:
-    - name: Restart sshd service
-      ansible.builtin.service:
-        name: ssh
-        state: restarted
-
-- name: Configure kubectl
-  hosts: localhost
-  connection: local
-  gather_facts: false
-  tags:
-    - configure-controller
   roles:
-    # - controller-config
+    - k3s_node_agent
 
-- name: Node labeling/tainting
+- name: k3s_core_node (ubuntu-worker01のみ)
+  hosts: ubuntu-worker01
+  become: yes
+  tags: k3s_core_node
+  roles:
+    - k3s_core_node
+
+- name: Ingressノード ラベル・テイント付与
   hosts: pi4-worker
+  become: false
   gather_facts: false
   roles:
-    - k3s_node_labeling
+    - k3s_ingress_node
 
 - name: Ingress/MetalLB/traefik 自動化
   hosts: localhost
@@ -54,5 +52,13 @@
   tags:
     - ingress
   roles:
-    - k3s_ingress
+    - k3s_ingress_helm
+
+- name: Helm/kubectl系タスク (localhost)
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  tags: k3s_core_node
+  roles:
+    - k3s_core_helm
 

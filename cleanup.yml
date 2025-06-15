@@ -1,6 +1,0 @@
----
-- name: Cleanup k3s on all nodes (except localhost)
-  hosts: all:!localhost
-  become: yes
-  roles:
-    - k3s_cleanup

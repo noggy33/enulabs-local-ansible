@@ -1,0 +1,6 @@
+---
+- name: Reload NFS Exports
+  ansible.builtin.command: exportfs -ra
+  become: true
+  listen: Reload NFS Exports
+  tags: [k3s_core]

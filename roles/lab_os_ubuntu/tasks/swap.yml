@@ -1,0 +1,11 @@
+- name: swapを無効化
+  ansible.builtin.command: swapoff -a
+  when: ansible_swaptotal_mb > 0
+  tags: lab_os_ubuntu
+
+- name: /etc/fstabからswapエントリをコメントアウト
+  ansible.builtin.replace:
+    path: /etc/fstab
+    regexp: '^([^#].*\\sswap\\s)'
+    replace: '#\1'
+  tags: lab_os_ubuntu

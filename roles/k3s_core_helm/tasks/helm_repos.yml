@@ -1,0 +1,20 @@
+---
+- name: nfs-csi Helmリポジトリ追加
+  kubernetes.core.helm_repository:
+    name: nfs-csi
+    repo_url: https://raw.githubusercontent.com/kubernetes-csi/csi-driver-nfs/master/charts
+    force_update: true
+  tags: k3s_core
+
+- name: Helmリポジトリ追加（Prometheus, Grafana, Timescale, NATS）
+  ansible.builtin.shell: |
+    helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+    helm repo add grafana https://grafana.github.io/helm-charts
+    helm repo add timescale https://charts.timescale.com
+    helm repo add nats https://nats-io.github.io/k8s/helm/charts/
+    helm repo update
+  args:
+    creates: /tmp/.helm_repos_added
+  register: helm_repo_add
+  changed_when: helm_repo_add.rc == 0
+  tags: k3s_core

@@ -1,0 +1,20 @@
+---
+- name: ZFS/NFS パッケージインストール
+  include_tasks: packages.yml
+  tags: k3s_core_node
+
+- name: ZFS プール・データセット構成
+  include_tasks: zfs.yml
+  tags: k3s_core_node
+
+- name: NFSエクスポート構成
+  include_tasks: nfs.yml
+  tags: k3s_core_node
+
+- name: ノードラベル付与
+  include_tasks: label.yml
+  tags: k3s_core_node
+
+- name: ノードテイント付与
+  include_tasks: taint.yml
+  tags: k3s_core_node

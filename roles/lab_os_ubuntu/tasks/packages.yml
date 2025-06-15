@@ -1,0 +1,9 @@
+- name: 必要なパッケージをインストール
+  ansible.builtin.apt:
+    name:
+      - curl
+      - nfs-common
+      - iptables
+    state: present
+    update_cache: yes
+  tags: lab_os_ubuntu

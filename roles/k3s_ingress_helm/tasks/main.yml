@@ -1,0 +1,10 @@
+---
+# tasks/main.yml から各論理単位ごとに分割したファイルをinclude_tasksで呼び出す
+- name: MetalLB関連セットアップ
+  ansible.builtin.include_tasks: metallb.yml
+
+- name: ingress-nginx関連セットアップ
+  ansible.builtin.include_tasks: ingress-nginx.yml
+
+- name: Traefik関連削除
+  ansible.builtin.include_tasks: traefik_cleanup.yml

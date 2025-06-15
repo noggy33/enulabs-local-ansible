@@ -1,0 +1,71 @@
+# roles/k3s_core_helm/files/jetstream-values.yaml
+# ------------------------------------------------------------
+natsOperator:
+  enabled: true
+  image:
+    tag: 1.5.0             # Operator イメージ
+  nodeSelector:
+    arch: amd64-core
+  tolerations:
+    - key: node-type
+      operator: Equal
+      value: core
+      effect: NoExecute
+
+reloader:
+  enabled: true
+  image:
+    tag: 0.15.0
+
+natsCluster:
+  enabled: true
+  name: jetstream
+  # Pod スケジューリング
+  nodeSelector:
+    arch: amd64-core
+  tolerations:
+    - key: node-type
+      operator: Equal
+      value: core
+      effect: NoExecute
+
+  size: 3                       # 3ノード構成
+  version: "2.10.10"            # NATS サーババージョン
+  resources:
+    requests:
+      cpu: 500m
+      memory: 512Mi
+    limits:
+      cpu: "1"
+      memory: 1Gi
+
+  jetstream:
+    enabled: true
+    # ストレージ設定（Mem+File のハイブリッド）
+    memStorage:
+      enabled: true
+      size: 512Mi
+    fileStorage:
+      enabled: true
+      size: 10Gi
+      storageClassName: nfs-persist   # ★クラスタに合わせる
+
+    maxFileStore: 15Gi               # ストリーム合計上限
+    domain: ""                       # ドメイン名不要なら空に
+
+  auth:
+    # シンプルな no–auth。ユーザ認証を入れる場合はここを置き換え
+    enabled: false
+
+  # ServiceType: LoadBalancer にしたい場合はここを変更
+  service:
+    type: ClusterIP
+    ports:
+      client: 4222
+      cluster: 6222
+      monitor: 8222
+      metrics: 7777
+      leafnodes: 7422
+      gateways: 7522
+
+# ------------------------------------------------------------

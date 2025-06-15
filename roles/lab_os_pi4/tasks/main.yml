@@ -1,0 +1,18 @@
+# network_pi4 + ssh_pi4 統合ロール
+
+- name: ネットワーク設定
+  include_tasks: network.yml
+  tags: lab_os_pi4
+
+- name: SSH設定
+  include_tasks: ssh.yml
+  tags: lab_os_pi4
+
+- name: パッケージアップデート
+  include_tasks: update.yml
+  tags: lab_os_pi4
+
+- name: cgroup v2有効化
+  include_tasks: cgroup.yml
+  tags: lab_os_pi4
+

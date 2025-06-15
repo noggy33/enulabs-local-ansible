@@ -1,0 +1,60 @@
+# --- TimescaleDB Single for k3s ------------------------------------------------
+# Chart : timescale/timescaledb-single (v0.25.*)
+# Cluster: enulabs (amd64 1 台のみで運用)
+
+# 1台構成
+replicaCount: 1
+
+# 利用イメージ（例: PG14 & TS 2.9）
+image:
+  repository: timescale/timescaledb-ha
+  tag: pg14.6-ts2.9.1-p1
+  pullPolicy: IfNotPresent
+
+# ──────────────────────────────────────────────
+# 永続ストレージ（NFS で RWO）
+persistentVolumes:
+  data:
+    enabled: true
+    size: 8Gi
+    storageClass: nfs-persist
+  wal:
+    enabled: true          # WAL 用。不要なら false
+    size: 2Gi
+    storageClass: nfs-persist
+
+# ──────────────────────────────────────────────
+# Service （Pod 内部アクセスだけなら ClusterIP で十分）
+service:
+  primary:
+    type: ClusterIP
+    port: 5432
+  replica:
+    type: ClusterIP
+    port: 5432
+
+# ──────────────────────────────────────────────
+# k3s の core ノードにだけ乗せる
+nodeSelector:
+  arch: amd64-core
+
+tolerations:
+  - key: node-type
+    operator: Equal
+    value: core
+    effect: NoExecute
+
+# ──────────────────────────────────────────────
+# 最低限のリソース例（環境次第で調整）
+resources:
+  requests:
+    cpu: 500m
+    memory: 1Gi
+  limits:
+    cpu: "1"
+    memory: 2Gi
+
+# ──────────────────────────────────────────────
+# TimescaleDB-Tune を有効に（デフォルト true）
+timescaledbTune:
+  enabled: true

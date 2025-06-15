@@ -1,0 +1,22 @@
+# ---------- NFS エクスポート -----------------------------
+- name: /etc/exports.d を確実に作成
+  ansible.builtin.file:
+    path: /etc/exports.d
+    state: directory
+    owner: root
+    group: root
+    mode: '0755'
+  become: true
+  tags: [k3s_core_node]
+
+- name: k8s 用エクスポート定義を配置
+  ansible.builtin.copy:
+    dest: /etc/exports.d/k8s.exports
+    content: |
+      /tank/nfs {{ nfs_export_network | mandatory }}(rw,sync,no_subtree_check,anonuid=65534,anongid=65534,no_root_squash)
+    owner: root
+    group: root
+    mode: '0644'
+  become: true
+  notify: Reload NFS Exports
+  tags: [k3s_core_node]

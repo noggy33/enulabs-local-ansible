@@ -1,0 +1,27 @@
+---
+# ingress-nginx関連セットアップ
+- name: Add ingress-nginx Helm repo
+  community.kubernetes.helm_repository:
+    name: ingress-nginx
+    repo_url: https://kubernetes.github.io/ingress-nginx
+    kubeconfig: files/k3s.yaml
+
+- name: Install ingress-nginx via Helm
+  community.kubernetes.helm:
+    name: ingress
+    chart_ref: ingress-nginx/ingress-nginx
+    release_namespace: ingress-nginx
+    create_namespace: true
+    state: present
+    update_repo_cache: true
+    values:
+      controller:
+        nodeSelector:
+          role: ingress
+        tolerations:
+          - key: ingress
+            operator: Exists
+        service:
+          type: LoadBalancer
+          loadBalancerIP: 192.168.4.230
+    kubeconfig: files/k3s.yaml

@@ -1,0 +1,8 @@
+---
+- name: ノードラベル付与
+  include_tasks: label.yml
+  tags: k3s_ingress_node
+
+- name: ノードテイント付与
+  include_tasks: taint.yml
+  tags: k3s_ingress_node

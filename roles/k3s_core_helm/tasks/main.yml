@@ -1,0 +1,26 @@
+---
+# Helm/kubectl系タスクを集約
+- name: Helmリポジトリ追加
+  include_tasks: helm_repos.yml
+  tags: k3s_core
+
+- name: NFS CSI基盤セットアップ
+  include_tasks: nfs_csi.yml
+  tags: k3s_core
+
+- name: kube-prometheus-stack を Helm でインストール
+  include_tasks: kube_prometheus_stack.yml
+  tags: k3s_core
+
+- name: Loki-stackをHelmでインストール
+  include_tasks: loki_stack.yml
+  tags: k3s_core
+
+- name: TimescaleDB (single-node) をHelmでインストール
+  include_tasks: timescaledb.yml
+  tags: k3s_core
+
+- name: JetStream OperatorをHelmでインストール
+  include_tasks: jetstream.yml
+  tags: k3s_core
+

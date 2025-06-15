@@ -1,0 +1,7 @@
+# --- パッケージアップデート ---
+- name: パッケージを最新化（apt update & upgrade）
+  ansible.builtin.apt:
+    update_cache: yes
+    upgrade: dist
+    cache_valid_time: 3600
+  register: apt_upgrade_result

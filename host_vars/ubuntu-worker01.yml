@@ -1,0 +1,8 @@
+# Ubuntu OS Worker Node
+hostname: ubuntu-worker01.enulabs.local
+ansible_host: 192.168.4.210
+ssh_password_auth: 'no'
+k8s_node_name: ubuntu-worker01.enulabs.local
+zfs_pool_device: /dev/sda1
+nfs_export_network: 192.168.4.0/24
+nfs_share_path: /tank/nfs

@@ -1,0 +1,30 @@
+# network_ubuntu + ssh_ubuntu 統合ロール
+
+- name: ネットワーク設定
+  include_tasks: network.yml
+  tags: lab_os_ubuntu
+
+- name: Timezone設定
+  include_tasks: timezone.yml
+  tags: lab_os_ubuntu
+
+- name: SSH設定
+  include_tasks: ssh.yml
+  tags: lab_os_ubuntu
+
+- name: パッケージアップデート
+  include_tasks: update.yml
+  tags: lab_os_ubuntu
+
+- name: 必要なパッケージをインストール
+  include_tasks: packages.yml
+  tags: lab_os_ubuntu
+
+- name: swap無効化
+  include_tasks: swap.yml
+  tags: lab_os_ubuntu
+
+- name: カーネルパラメータ調整
+  include_tasks: kernel.yml
+  tags: lab_os_ubuntu
+

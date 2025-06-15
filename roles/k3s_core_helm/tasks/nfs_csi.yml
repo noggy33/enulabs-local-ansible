@@ -1,0 +1,42 @@
+---
+- name: NFS CSIドライバをHelmでインストール
+  kubernetes.core.helm:
+    name: nfs-csi-driver
+    chart_ref: nfs-csi/csi-driver-nfs
+    release_namespace: kube-system
+    create_namespace: true
+  tags: k3s_core
+
+- name: NFS StorageClassマニフェストを配置
+  ansible.builtin.copy:
+    dest: /tmp/nfs-persist.yaml
+    content: |
+      apiVersion: storage.k8s.io/v1
+      kind: StorageClass
+      metadata:
+        name: nfs-persist
+      provisioner: nfs.csi.k8s.io
+      parameters:
+        server: 192.168.4.210
+        share: /tank/nfs
+      reclaimPolicy: Retain
+      allowVolumeExpansion: true
+      mountOptions:
+        - nfsvers=4.1
+    mode: '0644'
+  tags:
+    - k3s_core
+
+- name: NFS StorageClassを適用
+  ansible.builtin.shell: kubectl apply -f /tmp/nfs-persist.yaml
+  changed_when: true
+  tags:
+    - k3s_core
+
+- name: NFS-CSI DaemonSetにtolerations追加（master対応）
+  ansible.builtin.shell: |
+    kubectl -n kube-system patch ds csi-nfs-node --type=json -p \
+    '[{"op":"add","path":"/spec/template/spec/tolerations/-", "value":{"key":"node-role.kubernetes.io/master","operator":"Exists","effect":"NoSchedule"}}]'
+  changed_when: true
+  ignore_errors: true
+  tags: k3s_core

@@ -1,0 +1,36 @@
+###############################################################################
+# roles/k3s_core_node/tasks/zfs.yml  (要 community.general)
+###############################################################################
+- name: Check pool health
+  ansible.builtin.command: zpool list -H -o health tank
+  register: pool_health
+  changed_when: false
+  failed_when: false
+  become: true
+  tags: [k3s_core_node]
+
+- name: Abort if pool is not ONLINE
+  ansible.builtin.fail:
+    msg: >
+      ZFS pool "tank" is {{ pool_health.stdout | default('UNKNOWN') }}; 
+      resolve I/O errors (`zpool status -v tank`, `zpool clear`) before rerun.
+  when: pool_health.stdout != "ONLINE"
+  tags: [k3s_core_node]
+
+- name: Ensure dataset tank/k8s exists with mountpoint
+  community.general.zfs:
+    name: tank/k8s
+    state: present
+    extra_zfs_properties:
+      mountpoint: "{{ nfs_share_path }}"
+      compression: zstd
+  become: true
+  tags: [k3s_core_node]
+
+- name: Ensure mountpoint ownership
+  ansible.builtin.file:
+    path: "{{ nfs_share_path }}"
+    state: directory
+    owner: nobody
+    group: nogroup
+  tags: [k3s_core_node]

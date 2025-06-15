@@ -1,0 +1,17 @@
+---
+# Loki-stack Helmリリースのデプロイ
+- name: grafanaリポジトリ追加
+  community.kubernetes.helm_repository:
+    name: grafana
+    repo_url: https://grafana.github.io/helm-charts
+  tags: loki_stack
+
+- name: loki-stack Helmリリースのインストール
+  community.kubernetes.helm:
+    name: loki-stack
+    chart_ref: grafana/loki-stack
+    release_namespace: monitoring
+    create_namespace: true
+    values: "{{ lookup('file', 'files/loki-stack-values.yaml') | from_yaml }}"
+    wait: true
+  tags: loki_stack
